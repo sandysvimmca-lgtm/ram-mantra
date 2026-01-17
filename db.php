@@ -1,8 +1,8 @@
 <?php
 $host = "localhost";
-$dbname = "save_name";
-$user = "root";
-$pass = "";
+$dbname = "u382104307_naamjap_mantr";
+$user = "u382104307_sandeepsvimmca";
+$pass = "Sandeep@1187";
 
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
