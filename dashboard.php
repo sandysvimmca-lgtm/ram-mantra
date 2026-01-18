@@ -405,6 +405,7 @@ if (!$loginUserCount) $loginUserCount = 0;
 
             .main-card {
                 max-width: 700px;
+                margin-top:25px;
             }
         }
     </style>
