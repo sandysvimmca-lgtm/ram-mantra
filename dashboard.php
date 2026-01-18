@@ -392,8 +392,8 @@ if (!$loginUserCount) $loginUserCount = 0;
                 <div class="count-number" id="count"><?= htmlspecialchars($existingCount) ?></div>
             </div>
             <div class="stat-card">
-                <h6>Total Users Count</h6>
-                <div class="count-number" id="allCount"><?= htmlspecialchars($totalCount) ?></div>
+                <h6>Total Count</h6>
+                <div class="count-number" id="allCount"><?= htmlspecialchars($existingCount) ?></div>
             </div>
         </div>
 
