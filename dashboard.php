@@ -15,6 +15,7 @@ $csrf_token = $_SESSION['csrf_token'];
 
 $user_id = $_SESSION["user_id"];
 $username = $_SESSION["username"];
+$username = ucfirst($username);
 $today = date("Y-m-d");
 
 // Fetch today's count
@@ -23,7 +24,7 @@ $stmt->execute([$user_id, $today]);
 $row = $stmt->fetch();
 $existingCount = $row ? $row["count"] : 0;
 
-// Total count of all users for today
+// Total count of  users 
 $stmtUserTotal = $pdo->prepare("
     SELECT COALESCE(SUM(`count`), 0) 
     FROM ram_counts 
@@ -163,6 +164,7 @@ if (!$loginUserCount) $loginUserCount = 0;
             margin: 0 auto;
             width: 100%;
             max-width: 600px;
+            margin-top:25px;
         }
 
         .welcome-title {
@@ -331,6 +333,7 @@ if (!$loginUserCount) $loginUserCount = 0;
             .main-card {
                 padding: 20px 12px;
                 border-radius: 12px;
+                margin-top:25px;
             }
 
             .header-section {
@@ -388,12 +391,12 @@ if (!$loginUserCount) $loginUserCount = 0;
 
         <div class="stats-grid">
             <div class="stat-card">
-                <h6><?= htmlspecialchars($username) ?>'s Count</h6>
+                <h6><?= htmlspecialchars($username) ?> Count</h6>
                 <div class="count-number" id="count"><?= htmlspecialchars($existingCount) ?></div>
             </div>
             <div class="stat-card">
-                <h6>Total Count</h6>
-                <div class="count-number" id="allCount"><?= htmlspecialchars($existingCount) ?></div>
+                <h6><?= htmlspecialchars($username) ?> Total Count</h6>
+                <div class="count-number" id="allCount"><?= htmlspecialchars($totalCount) ?></div>
             </div>
         </div>
 
@@ -454,7 +457,7 @@ $(document).ready(function() {
                console.log("Server Response:", data);
                if(data.status === "success") {
                    $("#count").text(data.userCount);
-                   $("#allCount").text(data.totalCount);
+                   $("#allCount").text(data.userTotalCount);
                }
                $("#thumbBtn").prop("disabled", false);
            },

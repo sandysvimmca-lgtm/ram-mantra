@@ -66,10 +66,21 @@ if ($action === "increment") {
     $stmtTotal->execute();
     $totalCount = $stmtTotal->fetchColumn() ?: 0;
 
+    
+// Total count of all users for today
+$stmtUserTotal = $pdo->prepare("
+    SELECT COALESCE(SUM(`count`), 0) 
+    FROM ram_counts 
+    WHERE user_id = ?
+");
+$stmtUserTotal->execute([$user_id]);
+$userTotalCount  = $stmtUserTotal->fetchColumn();
+
 echo json_encode([
     "status" => "success",
     "userCount" => (int)$newCount,
-    "totalCount" => (int)$totalCount
+    "totalCount" => (int)$totalCount,
+    "userTotalCount" => (int)$userTotalCount
 ]);
 
     exit;
