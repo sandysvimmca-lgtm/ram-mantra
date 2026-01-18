@@ -129,6 +129,7 @@ if (!$loginUserCount) $loginUserCount = 0;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
             margin-bottom: 0;
+            margin-top:20px;
         }
 
         .stat-card {
