@@ -385,7 +385,7 @@ if (!$loginUserCount) $loginUserCount = 0;
 <body>
     <div class="dashboard-container">
         <div class="header-section">
-            <h2>🕉️ Ram Counter</h2>
+            <h2>🕉️ Ram Name Jaap</h2>
             <a href="logout.php" class="header-logout">Logout</a>
         </div>
 
