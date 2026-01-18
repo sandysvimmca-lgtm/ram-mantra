@@ -24,10 +24,21 @@ $row = $stmt->fetch();
 $existingCount = $row ? $row["count"] : 0;
 
 // Total count of all users for today
-$stmtTotal = $pdo->prepare("SELECT SUM(`count`) as total FROM ram_counts");
-$stmtTotal->execute();
-$totalCount = $stmtTotal->fetchColumn();
-if (!$totalCount) $totalCount = 0;
+$stmtUserTotal = $pdo->prepare("
+    SELECT COALESCE(SUM(`count`), 0) 
+    FROM ram_counts 
+    WHERE user_id = ?
+");
+$stmtUserTotal->execute([$user_id]);
+$totalCount  = $stmtUserTotal->fetchColumn();
+
+ 
+
+// Total count of login users using join with user table
+$stmtLoginUserCount = $pdo->prepare("SELECT COUNT(DISTINCT u.id) as total FROM users u INNER JOIN ram_counts rc ON u.id = rc.user_id");
+$stmtLoginUserCount->execute();
+$loginUserCount = $stmtLoginUserCount->fetchColumn();
+if (!$loginUserCount) $loginUserCount = 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -69,7 +80,7 @@ if (!$totalCount) $totalCount = 0;
         }
 
         .header-section {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #f94b4b 0%, #f5576c 100%);
             color: white;
             padding: 20px 15px;
             border-radius: 15px 15px 0 0;
@@ -115,7 +126,7 @@ if (!$totalCount) $totalCount = 0;
 
         .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
             margin-bottom: 0;
         }
@@ -128,6 +139,19 @@ if (!$totalCount) $totalCount = 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
+        .stat-card-grid {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            height: 200px;
+            align-content: start;
+            overflow: hidden;
+        }
+
         .stat-card h6 {
             font-size: clamp(0.85rem, 2.5vw, 1rem);
             color: #666;
@@ -138,7 +162,7 @@ if (!$totalCount) $totalCount = 0;
         .stat-card .count-number {
             font-size: clamp(1.75rem, 6vw, 2.5rem);
             font-weight: 700;
-            color: #667eea;
+            color: #ea6d66;
         }
 
         .main-card {
@@ -157,6 +181,7 @@ if (!$totalCount) $totalCount = 0;
             margin-bottom: 30px;
             color: #333;
             font-weight: 600;
+            color:#ea6d66;
         }
 
         .form-section {
@@ -277,40 +302,36 @@ if (!$totalCount) $totalCount = 0;
             text-align: center;
         }
 
-        #nameList {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 20px;
-            padding: 0;
+        .flying-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            min-height: 200px;
         }
 
-        .list-group-item {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
-            animation: slideIn 0.3s ease;
-        }
-
-        .list-group-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .list-group-item:hover {
-            background: #e9ecef;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
+        @keyframes flyRightToLeft {
+            0% {
                 opacity: 1;
-                transform: translateX(0);
+                transform: translateX(100vw);
             }
+            100% {
+                opacity: 0;
+                transform: translateX(-100vw);
+            }
+        }
+
+        .flying-ram-item {
+            font-size: 1.5rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: flyRightToLeft 12s linear forwards;
+            color: #e74427ff;
+            text-align: center;
+            white-space: nowrap;
         }
 
         @keyframes flyUp {
@@ -333,24 +354,6 @@ if (!$totalCount) $totalCount = 0;
             color: #e74427ff;
         }
 
-        #nameList::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #nameList::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        #nameList::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
-
-        #nameList::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
-        }
-
         @media (max-width: 576px) {
             body {
                 padding: 10px;
@@ -368,6 +371,7 @@ if (!$totalCount) $totalCount = 0;
 
             .stats-grid {
                 gap: 10px;
+                grid-template-columns: 1fr 1fr;
             }
 
             .stat-card {
@@ -421,6 +425,7 @@ if (!$totalCount) $totalCount = 0;
                 <h6>Total Users Count</h6>
                 <div class="count-number" id="allCount"><?= htmlspecialchars($totalCount) ?></div>
             </div>
+            <div class="stat-card-grid" id="flyingGridContainer"></div>
         </div>
 
         <div class="main-card">
@@ -436,8 +441,6 @@ if (!$totalCount) $totalCount = 0;
             <div class="logout-section">
                 <a href="logout.php" class="btn btn-danger btn-logout">Logout</a>
             </div>
-
-            <ul id="nameList" class="list-group"></ul>
         </div>
     </div>
 
@@ -483,7 +486,6 @@ $(document).ready(function() {
                if(data.status === "success") {
                    $("#count").text(data.userCount);
                    $("#allCount").text(data.totalCount);
-                   $("#nameList").append('<li class="list-group-item">राम</li>');
                }
                $("#thumbBtn").prop("disabled", false);
            },
@@ -493,6 +495,39 @@ $(document).ready(function() {
            $("#thumbBtn").prop("disabled", false);
        });
    }
+
+   // Function to create flying ram in grid
+   function createFlyingRamInGrid() {
+       const container = document.getElementById('flyingGridContainer');
+       
+       // Create 5 flying ram elements for all 5 rows with closer spacing
+       for (let row = 0; row < 5; row++) {
+           for (let col = 0; col < 5; col++) {
+               const flyingElement = document.createElement('div');
+               flyingElement.classList.add('flying-ram-item');
+               flyingElement.textContent = 'राम';
+               
+               // Position the element in a specific row and column
+               flyingElement.style.gridColumn = (col + 1);
+               flyingElement.style.gridRow = (row + 1);
+               
+               // Spacing between items
+               flyingElement.style.animationDelay = (col * 1.5) + 's';
+               
+               container.appendChild(flyingElement);
+               
+               // Remove element after animation completes
+               setTimeout(() => {
+                   flyingElement.remove();
+               }, 12000 + (col * 1500));
+           }
+       }
+   }
+
+   // Start continuous flowing animation
+   setInterval(() => {
+       createFlyingRamInGrid();
+   }, 1500);
 
    // ✅ Handle thumb button click
    $("#thumbBtn").on("click", function(e) {

@@ -28,6 +28,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION["user_id"] = $user["id"];
             $_SESSION["username"] = $user["username"];
 
+            // ✅ Log user login activity
+            $stmtLog = $pdo->prepare("INSERT INTO ram_activity_log (user_id, created_at) VALUES (?, NOW())");
+            $stmtLog->execute([$user["id"]]);
+
             // ✅ Login ke baad naya CSRF token generate karo
             $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
 
