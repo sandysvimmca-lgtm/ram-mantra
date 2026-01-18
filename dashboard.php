@@ -403,7 +403,7 @@ if (!$loginUserCount) $loginUserCount = 0;
         <div class="main-card">
             <h4 class="welcome-title">Welcome <?= htmlspecialchars($username) ?></h4>
 
-            <button id="thumbBtn" class="thumb-button" title="Click to add count">👍</button>
+            <button id="thumbBtn" class="thumb-button" title="Click to add count">✏️</button>
 
             <div class="button-group">
                 <button id="submitBtn" type="submit" form="ramForm" class="btn btn-primary">Submit</button>
