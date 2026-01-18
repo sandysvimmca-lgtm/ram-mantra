@@ -126,7 +126,7 @@ if (!$loginUserCount) $loginUserCount = 0;
 
         .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 0;
             margin-top:20px;
@@ -140,18 +140,7 @@ if (!$loginUserCount) $loginUserCount = 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .stat-card-grid {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            height: 200px;
-            align-content: start;
-            overflow: hidden;
-        }
+
 
         .stat-card h6 {
             font-size: clamp(0.85rem, 2.5vw, 1rem);
@@ -314,27 +303,6 @@ if (!$loginUserCount) $loginUserCount = 0;
             min-height: 200px;
         }
 
-        @keyframes flyRightToLeft {
-            0% {
-                opacity: 1;
-                transform: translateX(100vw);
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(-100vw);
-            }
-        }
-
-        .flying-ram-item {
-            font-size: 1.5rem;
-            font-weight: bold;
-            pointer-events: none;
-            animation: flyRightToLeft 12s linear forwards;
-            color: #e74427ff;
-            text-align: center;
-            white-space: nowrap;
-        }
-
         @keyframes flyUp {
             0% {
                 opacity: 1;
@@ -427,7 +395,6 @@ if (!$loginUserCount) $loginUserCount = 0;
                 <h6>Total Users Count</h6>
                 <div class="count-number" id="allCount"><?= htmlspecialchars($totalCount) ?></div>
             </div>
-            <div class="stat-card-grid" id="flyingGridContainer"></div>
         </div>
 
         <div class="main-card">
@@ -497,39 +464,6 @@ $(document).ready(function() {
            $("#thumbBtn").prop("disabled", false);
        });
    }
-
-   // Function to create flying ram in grid
-   function createFlyingRamInGrid() {
-       const container = document.getElementById('flyingGridContainer');
-       
-       // Create 5 flying ram elements for all 5 rows with closer spacing
-       for (let row = 0; row < 5; row++) {
-           for (let col = 0; col < 5; col++) {
-               const flyingElement = document.createElement('div');
-               flyingElement.classList.add('flying-ram-item');
-               flyingElement.textContent = 'राम';
-               
-               // Position the element in a specific row and column
-               flyingElement.style.gridColumn = (col + 1);
-               flyingElement.style.gridRow = (row + 1);
-               
-               // Spacing between items
-               flyingElement.style.animationDelay = (col * 1.5) + 's';
-               
-               container.appendChild(flyingElement);
-               
-               // Remove element after animation completes
-               setTimeout(() => {
-                   flyingElement.remove();
-               }, 12000 + (col * 1500));
-           }
-       }
-   }
-
-   // Start continuous flowing animation
-   setInterval(() => {
-       createFlyingRamInGrid();
-   }, 1500);
 
    // ✅ Handle thumb button click
    $("#thumbBtn").on("click", function(e) {
